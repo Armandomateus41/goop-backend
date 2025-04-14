@@ -12,14 +12,14 @@ const mockUser = {
     password: "123456",
     name: "Admin Goop"
 };
-// ✅ Login: exportação padrão
+//  Login: exportação padrão
 function login(req, res) {
     const { email, password } = req.body;
     if (email !== mockUser.email || password !== mockUser.password) {
         return res.status(401).json({ message: "Credenciais inválidas" });
     }
     const token = jsonwebtoken_1.default.sign({ email, name: mockUser.name }, env_1.JWT_SECRET, {
-        expiresIn: "58347539432h",
+        expiresIn: "539432h",
     });
     return res.json({
         token,
@@ -29,7 +29,7 @@ function login(req, res) {
         },
     });
 }
-// ✅ Método adicional: retorna o usuário do token
+//  Método adicional: retorna o usuário do token
 function me(req, res) {
     return res.json({ user: req.user });
 }

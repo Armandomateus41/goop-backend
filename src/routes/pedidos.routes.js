@@ -13,79 +13,84 @@ const express_1 = require("express");
 const auth_middleware_1 = require("../middleware/auth.middleware");
 const Pedido_1 = require("../models/Pedido");
 const router = (0, express_1.Router)();
-// Criar novo pedido
+// Criar pedido
 router.post("/pedidos", auth_middleware_1.verifyToken, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const pedidoCriado = yield Pedido_1.Pedido.create(req.body);
-        return res.status(201).json(pedidoCriado);
+        const pedido = yield Pedido_1.Pedido.create(req.body);
+        res.status(201).json(pedido);
     }
     catch (err) {
-        console.error("Erro ao salvar pedido:", err);
-        return res.status(500).json({ message: "Erro ao salvar pedido" });
+        res.status(500).json({ message: "Erro ao salvar pedido" });
     }
 }));
-// Listar todos os pedidos com filtro por cliente e status
+// Listar pedidos com paginação + filtros
 router.get("/pedidos", auth_middleware_1.verifyToken, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const { cliente, status } = req.query;
+        const { cliente, status, page = 1, limit = 10 } = req.query;
         const filtro = {};
         if (cliente) {
-            filtro.cliente = { $regex: new RegExp(cliente, "i") };
+            filtro.cliente = { $regex: new RegExp(String(cliente), "i") };
         }
-        if (status && ["PENDENTE", "PROCESSADO"].includes(status)) {
-            filtro.status = status;
+        const statusFormatado = String(status).toUpperCase();
+        if (status && ["PENDENTE", "PROCESSADO"].includes(statusFormatado)) {
+            filtro.status = statusFormatado;
         }
-        const pedidos = yield Pedido_1.Pedido.find(filtro).sort({ criadoEm: -1 });
-        return res.status(200).json(pedidos);
+        const pageNum = Number(page);
+        const limitNum = Number(limit);
+        const skip = (pageNum - 1) * limitNum;
+        const [pedidos, total] = yield Promise.all([
+            Pedido_1.Pedido.find(filtro).sort({ criadoEm: -1 }).skip(skip).limit(limitNum),
+            Pedido_1.Pedido.countDocuments(filtro),
+        ]);
+        return res.status(200).json({
+            pedidos,
+            total,
+            page: pageNum,
+            pages: Math.ceil(total / limitNum),
+        });
     }
     catch (err) {
-        console.error("Erro ao buscar pedidos:", err);
-        return res.status(500).json({ message: "Erro ao buscar pedidos" });
+        res.status(500).json({ message: "Erro ao buscar pedidos" });
     }
 }));
-// Buscar pedido por ID
+// Buscar por ID
 router.get("/pedidos/:id", auth_middleware_1.verifyToken, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const pedido = yield Pedido_1.Pedido.findById(req.params.id);
         if (!pedido)
             return res.status(404).json({ message: "Pedido não encontrado" });
-        return res.status(200).json(pedido);
+        res.status(200).json(pedido);
     }
     catch (err) {
-        console.error("Erro ao buscar pedido:", err);
-        return res.status(500).json({ message: "Erro interno ao buscar pedido" });
+        res.status(500).json({ message: "Erro interno" });
     }
 }));
-// Atualizar apenas o status do pedido
+// Atualizar pedido
+router.put("/pedidos/:id", auth_middleware_1.verifyToken, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const atualizado = yield Pedido_1.Pedido.findByIdAndUpdate(req.params.id, req.body, { new: true });
+        if (!atualizado)
+            return res.status(404).json({ message: "Pedido não encontrado" });
+        res.status(200).json(atualizado);
+    }
+    catch (err) {
+        res.status(500).json({ message: "Erro ao atualizar" });
+    }
+}));
+// Atualizar status
 router.patch("/pedidos/:id", auth_middleware_1.verifyToken, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { status } = req.body;
-        if (!["PENDENTE", "PROCESSADO"].includes(status)) {
+        const statusFormatado = String(status).toUpperCase();
+        if (!["PENDENTE", "PROCESSADO"].includes(statusFormatado))
             return res.status(400).json({ message: "Status inválido" });
-        }
-        const pedido = yield Pedido_1.Pedido.findByIdAndUpdate(req.params.id, { status }, { new: true });
+        const pedido = yield Pedido_1.Pedido.findByIdAndUpdate(req.params.id, { status: statusFormatado }, { new: true });
         if (!pedido)
             return res.status(404).json({ message: "Pedido não encontrado" });
-        return res.status(200).json(pedido);
+        res.status(200).json(pedido);
     }
     catch (err) {
-        console.error("Erro ao atualizar status:", err);
-        return res.status(500).json({ message: "Erro ao atualizar status" });
-    }
-}));
-// Atualizar pedido completo
-router.put("/pedidos/:id", auth_middleware_1.verifyToken, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    try {
-        const pedidoAtualizado = yield Pedido_1.Pedido.findByIdAndUpdate(req.params.id, req.body, {
-            new: true,
-        });
-        if (!pedidoAtualizado)
-            return res.status(404).json({ message: "Pedido não encontrado" });
-        return res.status(200).json(pedidoAtualizado);
-    }
-    catch (err) {
-        console.error("Erro ao atualizar pedido:", err);
-        return res.status(500).json({ message: "Erro ao atualizar pedido" });
+        res.status(500).json({ message: "Erro ao atualizar status" });
     }
 }));
 // Deletar pedido
@@ -94,11 +99,10 @@ router.delete("/pedidos/:id", auth_middleware_1.verifyToken, (req, res) => __awa
         const pedido = yield Pedido_1.Pedido.findByIdAndDelete(req.params.id);
         if (!pedido)
             return res.status(404).json({ message: "Pedido não encontrado" });
-        return res.status(200).json({ message: "Pedido deletado com sucesso" });
+        res.status(200).json({ message: "Pedido removido com sucesso" });
     }
     catch (err) {
-        console.error("Erro ao deletar pedido:", err);
-        return res.status(500).json({ message: "Erro ao deletar pedido" });
+        res.status(500).json({ message: "Erro ao deletar" });
     }
 }));
 exports.default = router;
