@@ -2,7 +2,7 @@
   "name": "goop-backend",
   "version": "1.0.0",
   "description": "API backend para o sistema Goop Dashboard",
-  "main": "dist/server.js",
+"main": "dist/server.js",
   "scripts": {
     "dev": "nodemon src/server.ts",
     "build": "tsc",
