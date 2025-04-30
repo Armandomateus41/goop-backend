@@ -90,5 +90,50 @@ router.delete("/usuarios/:id", verifyToken, async (req, res) => {
     res.status(500).json({ message: "Erro interno ao deletar" })
   }
 })
+// Atualizar permissões de um usuário
+router.patch("/usuarios/:id/permissoes", verifyToken, async (req, res) => {
+  try {
+    const { permissions } = req.body
+
+    if (!Array.isArray(permissions)) {
+      return res.status(400).json({ message: "Formato de permissões inválido" })
+    }
+
+    const usuario = await Usuario.findByIdAndUpdate(
+      req.params.id,
+      { permissions },
+      { new: true }
+    )
+
+    if (!usuario) {
+      return res.status(404).json({ message: "Usuário não encontrado" })
+    }
+
+    res.status(200).json({
+      message: "Permissões atualizadas com sucesso",
+      usuario,
+    })
+  } catch (err) {
+    console.error("Erro ao atualizar permissões:", err)
+    res.status(500).json({ message: "Erro interno ao atualizar permissões" })
+  }
+})
+
+router.get("/usuarios", verifyToken, async (req, res) => {
+  try {
+    const usuarioLogado = req.user // <-- Adquirido via verifyToken
+    if (!usuarioLogado.permissions?.includes("gerenciar_admins")) {
+      return res.status(403).json({ message: "Acesso negado" })
+    }
+
+    const usuarios = await Usuario.find().sort({ createdAt: -1 })
+    res.status(200).json(usuarios)
+  } catch (err) {
+    res.status(500).json({ message: "Erro ao buscar usuários" })
+  }
+})
+
+
+
 
 export default router

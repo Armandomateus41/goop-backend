@@ -5,6 +5,7 @@ import { connectToDatabase } from "./config/database"
 import cors from "cors"
 import dotenv from "dotenv"
 import usuarioRoutes from "./routes/usuarios.routes"
+import notificacoesRoutes from "./routes/notificacoes.routes"
 
 dotenv.config()
 
@@ -17,6 +18,7 @@ app.use(express.json())
 app.use("/api", authRoutes)
 app.use("/api", pedidoRoutes)
 app.use("/api", usuarioRoutes)
+app.use("/api", notificacoesRoutes)
 
 connectToDatabase().then(() => {
   app.listen(PORT, () => {

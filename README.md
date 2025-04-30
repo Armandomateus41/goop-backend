@@ -1,36 +1,46 @@
-### Backend
-Node.js + Express
+#  Goop Pedidos – Backend
 
-TypeScript
+Backend da aplicação **Goop Pedidos**, desenvolvido com **Node.js**, **Express** e **TypeScript**, utilizando **MongoDB** como banco de dados. Oferece autenticação com **JWT**, segurança com **BcryptJS**, e estrutura modular pronta para produção.
 
-MongoDB + Mongoose
+---
 
-JWT (autenticação)
+##  Tecnologias Utilizadas
 
-BcryptJS
+- **Node.js**
+- **Express**
+- **TypeScript**
+- **MongoDB** com **Mongoose**
+- **JWT** – Autenticação
+- **BcryptJS** – Hash de senha
+- **Dotenv** – Variáveis de ambiente
 
-Dotenv
-## Requisistos
-* Node.js 22 ou superior  - Conferir a versão: Node -v
-## sequcien para criar o projeto
-Criar o arquivo package
+---
+
+##  Requisitos
+
+- [Node.js](https://nodejs.org/) versão 22 ou superior
+- [MongoDB](https://www.mongodb.com/) local ou Atlas (cloud)
+- [npm](https://www.npmjs.com/)
+
+Verifique sua versão do Node.js:
+
+```bash
+node -v
+```
+1. Clone o repositório
+
+git clone https://github.com/Armandomateus41/goop-backend.git
+cd goop-backend
+
+2. Inicialize o projeto e crie o arquivo package.json
 npm init -y
-ou podes usar o npm init
-Instalar o expressse para gerencviar as requisições , rotas e URLs , entre outras funcionalidade
 
+3. Instale as dependências principais
+npm install express mongoose jsonwebtoken bcryptjs dotenv
 
-npm install express
-npm install express --save
+4. Instale as dependências de desenvolvimento
+npm install --save-dev typescript ts-node @types/node @types/express @types/jsonwebtoken @types/bcryptjs
 
-Instalar os pactes para suporte ao Typescript 
-npm i --save-dev @types/express
-npm i --save dev @types/node
+5. Inicialize o TypeScript
 
-Instalar o compilador do projeto typscript  do projeto e reinica o projeto
-
-npm i --save-dev ts-node
-
-TypeORM é um ORM que pode ser executado em plataformas NodeJS, Browser, Cordova, PhoneGap
-Instalar a dependeciua para conectar o Node.s (TypeScript)  com bano de dados.
- * npm install typeorm --save *
- 
+npx tsc --init
