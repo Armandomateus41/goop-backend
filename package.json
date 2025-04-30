@@ -2,11 +2,11 @@
   "name": "goop-backend",
   "version": "1.0.0",
   "description": "API backend para o sistema Goop Dashboard",
-"main": "dist/server.js",
+  "main": "dist/index.js",
   "scripts": {
-    "dev": "nodemon src/server.ts",
+    "dev": "nodemon src/index.ts",
     "build": "tsc",
-    "start": "node dist/server.js"
+    "start": "node dist/index.js"
   },
   "keywords": [],
   "author": "Armando Mateus",
